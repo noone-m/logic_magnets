@@ -3,6 +3,8 @@ from pprint import pprint
 from draw_helpers import draw_dots, draw_tokens, draw_targets
 from math import floor
 from utils import get_four_sides_cells, pull_down, pull_up, pull_left, pull_right, push_down, push_up, push_left, push_right
+from tree import Tree,Node
+from copy import deepcopy
 
 
 class Board:
@@ -12,7 +14,8 @@ class Board:
         self.tokens = {}
         self.height = 0
         self.width = 0
-    
+        # self.visited = False
+
     def init_board(self):
         self.height = int(input('Board height: '))
         self.width = int(input('Board width: '))
@@ -120,7 +123,61 @@ class Board:
         if value == 'P':
             self.apply_purple_logic(row,col)
         print(f'tokens : {self.tokens}')
+
     def check_victory(self):
         # Check if all tokens are on their target positions
         return all(pos in self.targets for pos in self.tokens.keys())
 
+    def get_tokens(self):
+        red_tokens = []
+        purple_tokens = []
+        empty_places = []
+        black_tokens = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.board[i][j] == 'R':
+                    red_tokens.append((i,j))
+                if self.board[i][j] == 'P':
+                    purple_tokens.append((i,j))
+                if self.board[i][j] == 'B':
+                    black_tokens.append((i,j))
+                if self.board[i][j] == 'E':
+                    empty_places.append((i,j))
+
+        return red_tokens,purple_tokens,black_tokens,empty_places
+
+    def get_possible_boards(self):
+        """
+        we can move red and purple tokens to get a new board
+        """
+        possible_boards = []
+        red_tokens, purple_tokens,_, empty_places = self.get_tokens()
+        print(f'self tokens {self.tokens}')
+        for token in red_tokens:
+            for empty_place in empty_places:
+                board = deepcopy(self)
+                board.board[token[0]][token[1]] = 'E'
+                board.board[empty_place[0]][empty_place[1]] = 'R'
+                board.tokens.pop((token[0],token[1]))
+                board.tokens[(empty_place[0],empty_place[1])] = 'R'
+                board.apply_red_logic(empty_place[0],empty_place[1])
+                possible_boards.append(board)
+        for token in purple_tokens:
+            for empty_place in empty_places:
+                board = deepcopy(self)
+                board.board[token[0]][token[1]] = 'E'
+                board.board[empty_place[0]][empty_place[1]] = 'P'
+                board.tokens.pop((token[0],token[1]))
+                board.tokens[(empty_place[0],empty_place[1])] = 'P'
+                board.apply_purple_logic(empty_place[0],empty_place[1])
+                possible_boards.append(board)
+            
+        
+        return possible_boards
+    
+    def __str__(self):
+        return f'board is {self.board}'
+    
+    def __repr__(self):
+        return f'board is {self.board}'
+    

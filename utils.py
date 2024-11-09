@@ -1,6 +1,7 @@
 from math import floor
+from tree import Tree
 
-def handle_click(board, pos, selected_token):
+def handle_left_click(board, pos, selected_token):
     """
     Handles a click to either select a token or move it to a new position.
     """
@@ -137,6 +138,7 @@ def pushed_cells(cells):
                 return pushed_cells
             if value in ['R','P','B']:
                 pushed_cells.append({key:value})
+    return pushed_cells
 
 def push_down(board, down_cells):
     if down_cells:
@@ -152,6 +154,7 @@ def push_down(board, down_cells):
                         board.board[row][col] = 'E'
                         board.board[row+1][col] = value   
                         board.tokens.pop((row,col))
+                        board.tokens[(row+1,col)] = value
                 elif value == 'D':
                     return
 
@@ -202,7 +205,7 @@ def push_left(board, left_cells):
                 if value in ['R','P','B']:
                     _,_,left_cells2,_ = get_four_sides_cells(board, row, col)
                     if is_pushed(left_cells2):
-                        pull_left(board,left_cells2)
+                        push_left(board,left_cells2)
                     else:
                         return
                     if 0<= col - 1 < board.width:
@@ -214,3 +217,54 @@ def push_left(board, left_cells):
                     return
                 elif value == 'D':
                     return
+
+
+def find_solution_bfs(board):
+    queue = []
+    visited = set()
+    tree = Tree(board)
+    queue.append(tree.root)
+    while queue:
+        pointer = queue.pop(0)
+        visited.add(str(pointer.value.board))  
+        print(f'pointer is {pointer.value}')
+        print(f'tokens are {pointer.value.tokens}')
+        if pointer.value.check_victory():
+            path = pointer.get_path()
+            return path
+        
+        children = pointer.value.get_possible_boards()
+        pointer.add_children(children)
+        
+        for child in pointer.children:
+            board_state_str = str(child.value.board)  # Convert board to a hashable type
+            if board_state_str not in visited:
+                visited.add(board_state_str)
+                queue.append(child)
+    
+    return None  
+
+def find_solution_dfs(board):
+    stack = []
+    visited = set()
+    tree = Tree(board)
+    stack.append(tree.root)
+    while stack:
+        pointer = stack.pop()
+        visited.add(str(pointer.value.board))  
+        print(f'pointer is {pointer.value}')
+        print(f'tokens are {pointer.value.tokens}')
+        if pointer.value.check_victory():
+            path = pointer.get_path()
+            return path
+        
+        children = pointer.value.get_possible_boards()
+        pointer.add_children(children)
+        
+        for child in pointer.children:
+            board_state_str = str(child.value.board)  # Convert board to a hashable type
+            if board_state_str not in visited:
+                visited.add(board_state_str)
+                stack.append(child)
+    
+    return None
