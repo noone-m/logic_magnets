@@ -1,5 +1,6 @@
 from math import floor
 from tree import Tree
+import heapq
 
 def handle_left_click(board, pos, selected_token):
     """
@@ -220,11 +221,14 @@ def push_left(board, left_cells):
 
 
 def find_solution_bfs(board):
+    i = 0
     queue = []
     visited = set()
     tree = Tree(board)
     queue.append(tree.root)
     while queue:
+        i = i + 1
+        print(i)
         pointer = queue.pop(0)
         visited.add(str(pointer.value.board))  
         print(f'pointer is {pointer.value}')
@@ -232,7 +236,6 @@ def find_solution_bfs(board):
         if pointer.value.check_victory():
             path = pointer.get_path()
             return path
-        
         children = pointer.value.get_possible_boards()
         pointer.add_children(children)
         
@@ -268,3 +271,49 @@ def find_solution_dfs(board):
                 stack.append(child)
     
     return None
+
+# function to apply cost logic
+# for this game it is only adding one on the parent cost
+def apply_cost(node):
+    node.cost = node.parent.cost + 1
+
+def find_solution_ucs(board):
+    """
+    this function apply the Uniform Cost Search
+    it takes some board as initial start position and then go to the least costly node
+
+    - how i implemented the algorithim?
+    we start by creating a tree and its root is the initial board 
+    we keep track visited boards using a visited set
+    we start with cost 0 for the root
+    we push the root (initial board) to the priority queue.
+    while the queue not empty pop the board with smallest cost to reach
+    add it to visited
+    we check if it is a winning position by calling check_victory
+    if it is retrun the path
+    then we expand the tree, add children to tree 
+    and iterate
+    """
+    heap = []
+    tree = Tree(board)
+    visited = set()
+    tree.root.cost = 0
+    heapq.heappush(heap, tree.root)
+
+    while heap:
+        pointer = heapq.heappop(heap)
+        visited.add(str(pointer.value.board))
+        if pointer.value.check_victory():
+            path = pointer.get_path()
+            return path,pointer.cost
+        children = pointer.value.get_possible_boards()
+        pointer.add_children(children)
+
+        for child in pointer.children:
+            board_state_str = str(child.value.board)  # Convert board to a hashable type
+
+            if board_state_str not in visited:
+                apply_cost(child)
+                visited.add(board_state_str)
+                heapq.heappush(heap, (child))
+    

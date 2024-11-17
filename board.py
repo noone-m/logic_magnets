@@ -176,8 +176,7 @@ class Board:
         return possible_boards
     
     def __str__(self):
-        return f'board is {self.board}'
+        return f'{self.board}'
     
     def __repr__(self):
-        return f'board is {self.board}'
-    
+        return f' {self.board}'

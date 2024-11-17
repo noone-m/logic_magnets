@@ -1,7 +1,7 @@
 import pygame
 import sys
 from board import Board
-from utils import handle_left_click,find_solution_bfs,find_solution_dfs
+from utils import handle_left_click,find_solution_bfs,find_solution_dfs,find_solution_ucs
 from draw_helpers import show_victory_message, draw_menu, draw_solution_path
 
 # Initialize the board and pygame
@@ -17,6 +17,9 @@ menu_open = False
 menu_position = (0, 0)
 bfs_button_rect = pygame.Rect(0, 0, 180, 40)
 dfs_button_rect = pygame.Rect(0, 0, 180, 40)
+path = find_solution_ucs(board)
+print(path)
+
 
 
 while running:
@@ -65,3 +68,4 @@ while running:
 
 pygame.quit()
 sys.exit()
+
