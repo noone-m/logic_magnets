@@ -63,12 +63,12 @@ def draw_text(screen, text, x, y, font_size=24, color=(0, 0, 0)):
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x, y))
 
-def draw_menu(screen, pos, bfs_button_rect, dfs_button_rect):
+def draw_menu(screen, pos, bfs_button_rect, dfs_button_rect,ucs_button_rect,hc_button_rect):
     """
     draw a menu with options to solve the game
     """
     # menu background
-    menu_width, menu_height = 200, 100
+    menu_width, menu_height = 200, 180
     button_height = 40
     bg_color = (200, 200, 200)
     hover_color = (180, 180, 180)
@@ -93,13 +93,27 @@ def draw_menu(screen, pos, bfs_button_rect, dfs_button_rect):
         pygame.draw.rect(screen, bg_color, dfs_button_rect, border_radius=5)
     draw_text(screen, "Solve with DFS", dfs_button_rect.x + 10, dfs_button_rect.y + 8, color=text_color)
 
+
+    # Draw UCS button
+    if ucs_button_rect.collidepoint(pygame.mouse.get_pos()):
+        pygame.draw.rect(screen, hover_color, ucs_button_rect, border_radius=5)
+    else:
+        pygame.draw.rect(screen, bg_color, ucs_button_rect, border_radius=5)
+    draw_text(screen, "Solve with UCS", ucs_button_rect.x + 10, ucs_button_rect.y + 8, color=text_color)
+
+    if hc_button_rect.collidepoint(pygame.mouse.get_pos()):
+        pygame.draw.rect(screen, hover_color, hc_button_rect, border_radius=5)
+    else:
+        pygame.draw.rect(screen, bg_color, hc_button_rect, border_radius=5)
+    draw_text(screen, "Solve with HC", hc_button_rect.x + 10, hc_button_rect.y + 8, color=text_color)
+
 def draw_solution_path(path, screen):
     """implement visualization for the path of boards returned by BFS or DFS"""
-    
-    for board_state in path:
-        board_state.value.draw(screen)
-        pygame.display.flip()
-        pygame.time.delay(4000)  # Delay for each step of visualization
-    show_victory_message(screen)
-    pygame.quit()
-    sys.exit()
+    if path is not None:
+        for board_state in path:
+            board_state.value.draw(screen)
+            pygame.display.flip()
+            pygame.time.delay(4000)  # Delay for each step of visualization
+        show_victory_message(screen)
+        pygame.quit()
+        sys.exit()

@@ -1,5 +1,6 @@
 from math import floor
 from tree import Tree
+from copy import deepcopy
 import heapq
 
 def handle_left_click(board, pos, selected_token):
@@ -28,7 +29,6 @@ def handle_left_click(board, pos, selected_token):
         else:
             # If the target position is invalid, deselect without moving
             selected_token['value'] = None  
-    print(f'selected : {selected_token}')
 
 
 def get_four_sides_cells(board,row,col):
@@ -48,10 +48,6 @@ def get_four_sides_cells(board,row,col):
             right_cells.append({(row,i):board.board[row][i]})
     up_cells = list(reversed(up_cells))
     left_cells = list(reversed(left_cells))
-    print(up_cells)
-    print(down_cells)
-    print(left_cells)
-    print(right_cells)
     return up_cells,down_cells,left_cells,right_cells
 
 
@@ -228,11 +224,8 @@ def find_solution_bfs(board):
     queue.append(tree.root)
     while queue:
         i = i + 1
-        print(i)
         pointer = queue.pop(0)
         visited.add(str(pointer.value.board))  
-        print(f'pointer is {pointer.value}')
-        print(f'tokens are {pointer.value.tokens}')
         if pointer.value.check_victory():
             path = pointer.get_path()
             return path
@@ -255,8 +248,6 @@ def find_solution_dfs(board):
     while stack:
         pointer = stack.pop()
         visited.add(str(pointer.value.board))  
-        print(f'pointer is {pointer.value}')
-        print(f'tokens are {pointer.value.tokens}')
         if pointer.value.check_victory():
             path = pointer.get_path()
             return path
@@ -316,4 +307,56 @@ def find_solution_ucs(board):
                 apply_cost(child)
                 visited.add(board_state_str)
                 heapq.heappush(heap, (child))
-    
+
+
+def manhaten_distance(x1,y1,x2,y2) :
+    return abs(x2-x1) + abs(y2-y1)
+
+def heuristic(board):
+    score = 0
+    tokens = deepcopy(board.tokens)
+    targets = deepcopy(board.targets)
+    for pos,token in tokens.items():
+        min_distance = 1e3
+        for target in targets:
+            distance = manhaten_distance(pos[0],pos[1],target[0],target[1])
+            if token == 'B':
+                if distance < min_distance:
+                    min_distance = distance
+            else:
+                if distance == 0:
+                    min_distance = 0
+                    break
+                else: min_distance = 1
+            score += min_distance
+            targets.remove(target)
+            
+
+        else:
+            distance = manhaten_distance(pos[0],pos[1],target[0],target[1])
+            score += 1
+        return score
+
+def find_solution_hill_climbing(board):
+    heap = []
+    tree = Tree(board)
+    tree.root.cost = heuristic(board) 
+    heapq.heappush(heap,tree.root)
+    while heap:
+        pointer = heapq.heappop(heap)
+        heap.clear()
+        print(f'heap is {heap}')
+        if pointer.value.check_victory():
+            path = pointer.get_path()
+            return path,pointer.cost 
+        children = pointer.value.get_possible_boards()
+        print(children)
+        pointer.add_children(children)       
+        for child in pointer.children:
+            child.cost = heuristic(child.value)
+            print(f'child cost is {child.cost}')
+            if child.cost < pointer.cost:
+                print('yes')
+                heapq.heappush(heap, child)
+        print(f'heap in the end is {heap}')
+    return None

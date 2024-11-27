@@ -122,7 +122,6 @@ class Board:
             self.apply_red_logic(row,col)
         if value == 'P':
             self.apply_purple_logic(row,col)
-        print(f'tokens : {self.tokens}')
 
     def check_victory(self):
         # Check if all tokens are on their target positions
@@ -152,7 +151,6 @@ class Board:
         """
         possible_boards = []
         red_tokens, purple_tokens,_, empty_places = self.get_tokens()
-        print(f'self tokens {self.tokens}')
         for token in red_tokens:
             for empty_place in empty_places:
                 board = deepcopy(self)

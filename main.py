@@ -1,7 +1,7 @@
 import pygame
 import sys
 from board import Board
-from utils import handle_left_click,find_solution_bfs,find_solution_dfs,find_solution_ucs
+from utils import handle_left_click,find_solution_bfs,find_solution_dfs,find_solution_ucs, find_solution_hill_climbing
 from draw_helpers import show_victory_message, draw_menu, draw_solution_path
 
 # Initialize the board and pygame
@@ -17,7 +17,9 @@ menu_open = False
 menu_position = (0, 0)
 bfs_button_rect = pygame.Rect(0, 0, 180, 40)
 dfs_button_rect = pygame.Rect(0, 0, 180, 40)
-path = find_solution_ucs(board)
+ucs_button_rect = pygame.Rect(0, 0, 180, 40)
+hc_button_rect = pygame.Rect(0, 0, 180, 40)
+path = find_solution_hill_climbing(board)
 print(path)
 
 
@@ -42,6 +44,23 @@ while running:
                         draw_solution_path(path, screen)
                         print('dfs')
                         menu_open = False
+                    elif ucs_button_rect.collidepoint(event.pos):
+                        try:
+                            path,cost = find_solution_ucs(board)
+                            draw_solution_path(path, screen)
+                        except Exception:
+                            pass
+                        print('ucs')
+                        menu_open = False
+                    elif hc_button_rect.collidepoint(event.pos):
+                        try:
+                            path,cost = find_solution_hill_climbing(board)
+                            print(f'cost is {cost}')
+                            draw_solution_path(path, screen)
+                        except Exception:
+                            pass
+                        print('hc')
+                        menu_open = False
                     else:
                         # Close the menu if clicked outside of buttons
                         menu_open = False
@@ -53,11 +72,13 @@ while running:
                 menu_position = event.pos
                 bfs_button_rect.topleft = (menu_position[0] + 10, menu_position[1] + 10)
                 dfs_button_rect.topleft = (menu_position[0] + 10, menu_position[1] + 50)
+                ucs_button_rect.topleft = (menu_position[0] + 10, menu_position[1] + 90)
+                hc_button_rect.topleft = (menu_position[0] + 10, menu_position[1] + 130)
                 print("menu opened at:", menu_position)  
 
     board.draw(screen)
     if menu_open:
-        draw_menu(screen, menu_position, bfs_button_rect, dfs_button_rect)
+        draw_menu(screen, menu_position, bfs_button_rect, dfs_button_rect,ucs_button_rect,hc_button_rect)
 
     pygame.display.flip()
 
